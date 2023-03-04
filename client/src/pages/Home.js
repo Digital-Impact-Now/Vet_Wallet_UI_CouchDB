@@ -1,10 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import path from 'path';
-import TxtData from "./TxtData";
-
-//require('dotenv').config({path: path.resolve(__dirname, "../.env")})
-
-//const baseURL = "http://3.16.10.168:3000/user/api/v1/"
 
 const baseURL = process.env.REACT_APP_FABRIC_BASEURL;
 
@@ -19,7 +13,6 @@ function Home() {
     fetch("/express_backend")
       .then((res) => res.text())
       .then((data) => {
-        console.log(data);
         setTxData(data);
       })
       .catch((err) => {
@@ -37,9 +30,7 @@ function Home() {
         "Content-type": "application/json; charset=UTF-8",
       },
     })
-      // Converting to JSON
       .then((response) => response.json())
-      // Setting balance value to response value
       .then((json) => setBalance(json));
   }, [Balance]);
 
@@ -53,7 +44,6 @@ function Home() {
         "Content-type": "application/json; charset=UTF-8",
       },
     })
-      // Converting to JSON
       .then((response) => {
         response.text().then(function (text) {
           setID(text);
@@ -63,8 +53,6 @@ function Home() {
         console.log(e);
       });
   }, []);
-
-  console.log(txData);
 
   //Import JSON string
   var stringJSON = JSON.stringify(txData);
@@ -95,7 +83,7 @@ function Home() {
     //Remove pushed object from JSON txt
     stringJSON = stringJSON.replace(",", "");
     stringJSON = stringJSON.substring(jsonObj.length);
-    console.log(stringJSON);
+    // console.log(stringJSON);
   }
 
   //Push object to array
@@ -106,8 +94,13 @@ function Home() {
     console.error(error);
   }
 
+  const userArray = objArray.filter(
+    (tx) => tx.value.name === sessionStorage.getItem("fabricUserName")
+  );
+
   //Log object array
-  console.log(objArray);
+  console.log("obj" + objArray);
+  console.log("usr:" + userArray);
 
   return (
     <div className="home-page">
@@ -140,20 +133,12 @@ function Home() {
       </div>
 
       <div className="tx-wrapper">
-        {objArray.map((tx, i) => (
+        {userArray.map((tx, i) => (
           <div key={i}>
-            {/* <p>Name: {tx.value.name}</p>
-                        <p>Wallet: {tx.value.wAddress}</p>
-                        <p>Price: {tx.value.price}</p>
-                        <p>Location: {tx.value.loc}</p>
-                        <p>Timestamp: {tx.value.timestamp}</p>
-                        <p>Tx ID: {tx.value.tx_id}</p> */}
-
             {
               <div className="tx-box">
                 <h2 className="tx-type"> EBT purchase </h2>
                 <p className="tx-date"> {tx.value.timestamp} </p>
-                {/* <p> className="tx-timestamp">ti:me</p> */}
                 <p className="tx-loc"> {tx.value.location} </p>
                 <p className="tx-amount"> $ {tx.value.price} </p>
               </div>
