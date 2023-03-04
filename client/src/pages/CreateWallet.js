@@ -9,6 +9,8 @@ function CreateWallet() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
+  sessionStorage.setItem("fabricUserName", name);
+
   function initAccount1() {
     return new Promise(function (resolve, reject) {
       fetch(transferURL + "RequestTransfer", {
@@ -95,6 +97,7 @@ function CreateWallet() {
       await initAccount();
       await initAccount1();
       alert("Wallet creation complete. Account initialized");
+      window.location.assign("./Home");
     }
   }
 
