@@ -10,6 +10,7 @@
 
 # production
 /build
+deploy.sh
 
 # misc
 .env
