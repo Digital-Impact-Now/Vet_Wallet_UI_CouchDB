@@ -31,7 +31,10 @@ function Home() {
       },
     })
       .then((response) => response.json())
-      .then((json) => setBalance(json));
+      .then((json) => setBalance(json))
+      .catch((err) => {
+        console.log(err);
+      });
   }, [Balance]);
 
   useEffect(() => {

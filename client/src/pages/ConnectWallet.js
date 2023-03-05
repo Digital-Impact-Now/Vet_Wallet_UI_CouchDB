@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Logo from "../logo2.png";
 
 const baseURL = process.env.REACT_APP_FABRIC_BASEURL;
@@ -7,52 +7,56 @@ function ConnectWallet() {
   const [name, setName] = useState("");
   sessionStorage.setItem("fabricUserName", name);
 
-  async function checkAndConnect() {
-    let fabricResponse = await fetch(baseURL + "GetAccountBalance", {
-      method: "POST",
-      body: JSON.stringify({
-        fabricUserName: sessionStorage.getItem("fabricUserName"),
-      }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
-    let validAccount = await fabricResponse.text();
-
-    console.log(sessionStorage.getItem("fabricUserName"));
-    // console.log(validAccount);
-    if (validAccount === "Wallet does not exist") {
-      alert("Wallet does not exist, please enter your existing wallet");
-      return;
+  //Activate on Button click
+  const fetchAccount = async () => {
+    try {
+      const fabricResponse = await fetch(baseURL + "GetAccountBalance", {
+        method: "POST",
+        body: JSON.stringify({
+          fabricUserName: sessionStorage.getItem("fabricUserName"),
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      });
+      const valid = await fabricResponse.text();
+      checkAndConnect(valid);
+    } catch (err) {
+      console.log(err);
     }
-    window.location.assign("./Home");
-  }
+  };
 
-  useEffect(() => {
-    const listener = (event) => {
-      if (event.code === "Enter" || event.code === "NumpadEnter") {
-        console.log("Enter key was pressed. Run your function.");
-        event.preventDefault();
-        checkAndConnect();
-      }
-    };
-    document.addEventListener("keydown", listener);
-    return () => {
-      document.removeEventListener("keydown", listener);
-    };
-  }, []);
+  const checkAndConnect = (valid) => {
+    if (
+      valid !== "Wallet does not exist" &&
+      valid !== undefined &&
+      valid !== "" &&
+      valid !== null &&
+      valid !== "{}"
+    ) {
+      console.log("YO it WORKING");
+      window.location.assign("./Home");
+    }
+    alert("Wallet does not exist, please enter your existing wallet");
+  };
 
-  //   let fabricResponse = useEffect(() => {
-  //     fetch(baseURL + "GetAccountBalance", {
-  //       method: "POST",
-  //       body: JSON.stringify({
-  //         fabricUserName: sessionStorage.getItem("fabricUserName"),
-  //       }),
-  //       headers: {
-  //         "Content-type": "application/json; charset=UTF-8",
-  //       },
-  //     });
-  //   }, []);
+  // when Enter is pressed
+  const keyPress = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      fetchAccount();
+    }
+  };
+
+  // prevent actual form submission
+  const preventSubmit = (event) => {
+    event.preventDefault();
+  };
+
+  // handle input change
+  const inputHandler = (e) => {
+    setName(e.target.value);
+  };
 
   return (
     <div className="connect-page">
@@ -67,23 +71,22 @@ function ConnectWallet() {
 
       <div className="connect-body">
         <h1>Enter your username</h1>
-        <form className="user">
+
+        <form className="user" onSubmit={preventSubmit}>
           <input
             type="text"
             id="username"
             name="name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={inputHandler}
+            onKeyDown={keyPress}
           />{" "}
           <br></br>
+          <button type="submit" className="unlock" onClick={fetchAccount}>
+            Unlock
+          </button>
         </form>
-
-        <button className="unlock" onClick={checkAndConnect}>
-          Unlock
-        </button>
       </div>
-
-      {/* <h2 className="seedphrase-link" onClick={() => window.location = './SeedPhrase'}> import using private key</h2> */}
     </div>
   );
 }
