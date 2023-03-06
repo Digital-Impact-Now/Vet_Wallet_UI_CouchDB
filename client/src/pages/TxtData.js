@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from "react";
 
 function TxtData() {
-  const [txData, setTxData] = useState([]);
   const [userArr, setUserArr] = useState([]);
 
   useEffect(() => {
     fetch("/express_backend")
       .then((res) => res.text())
       .then((data) => {
-        setTxData(data);
-
         const stringJSON = JSON.stringify(data);
-
         const cleanedJSON = cleanRawData(stringJSON);
         const objArr = buildArray(cleanedJSON);
 
@@ -35,10 +31,11 @@ function TxtData() {
     console.log("raw: " + stringJSON);
 
     //Remove invalid characters & transactions text
-    let cleanedJSON = stringJSON.replace(/\n|\r/g, "");
-    cleanedJSON = cleanedJSON.replaceAll("\\", "");
-    cleanedJSON = cleanedJSON.replace('"{"transactions":[', "");
-    cleanedJSON = cleanedJSON.slice(0, -3);
+    let cleanedJSON = stringJSON
+      .replace(/\n|\r/g, "")
+      .replaceAll("\\", "")
+      .replace('"{"transactions":[', "")
+      .slice(0, -3);
     return cleanedJSON;
   };
 
@@ -50,14 +47,14 @@ function TxtData() {
 
     while ((cleanedJSON.match(/id/g) || []).length > 2) {
       //Parse JSON to object
-      jsonObj = cleanedJSON.substr(0, cleanedJSON.indexOf(',{"id":'));
+      jsonObj = cleanedJSON.substring(0, cleanedJSON.indexOf(',{"id":'));
 
       //Push object to array
       try {
         obj = JSON.parse(jsonObj);
         objArray.push(obj);
       } catch (error) {
-        console.error(error);
+        throw new Error(`Error parsing JSON object: ${error.message}`);
       }
 
       //Remove pushed object from JSON txt
@@ -71,7 +68,7 @@ function TxtData() {
       obj = JSON.parse(cleanedJSON);
       objArray.push(obj);
     } catch (error) {
-      console.error(error);
+      throw new Error(`Error parsing JSON object: ${error.message}`);
     }
 
     return objArray;
